@@ -1,14 +1,16 @@
 FROM node:20.9.0 as front-builder
 WORKDIR /build
-RUN npm install -g @quasar/cli
+RUN npm config set registry https://mirrors.huaweicloud.com/repository/npm && npm install -g @quasar/cli
 COPY . .
 RUN cd front/palworld-front && npm install && quasar build
 FROM golang:1.21.1-alpine as builder
 WORKDIR /build
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 RUN apk add --no-cache upx
 COPY . .
 COPY --from=front-builder /build/webui/dist /build/webui/dist
-RUN cd /build && \
+RUN cd /build && go env -w GO111MODULE=auto && \
+go env -w GOPROXY=https://goproxy.cn,direct && \
 go build -ldflags="-s -w" -o /palworld-go-webui && \
 upx /palworld-go-webui
 FROM alpine
