@@ -2,7 +2,7 @@ FROM golang:alpine as builder
 WORKDIR /build
 RUN apk add --no-cache upx 
 COPY . .
-RUN go build -ldflags="-s -w" -o /palworld-go-webui cmd/main.go && \
+RUN go build -ldflags="-s -w" -o /palworld-go-webui main.go && \
     upx --lzma /palworld-go-webui
 
 FROM alpine
